@@ -19,6 +19,11 @@ def get_db():
         db.close()
 
 
+@app.get("/", tags=["root"])
+async def read_root():
+    return {"message": "Welcome to this fantastic app!"}
+
+
 @app.post("/users/", response_model=schemas.User, tags=["users"], status_code=201)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_username(db, username=user.username)
