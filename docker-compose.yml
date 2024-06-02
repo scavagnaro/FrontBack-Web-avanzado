@@ -1,4 +1,4 @@
-version: '2.27'
+version: '3.8'
 
 services:
   app:
@@ -8,14 +8,13 @@ services:
     container_name: fastapi-app
     ports:
       - "8000:8000"
-    environment:
-      - AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
-      - AWS_DEFAULT_REGION=us-east-1
+    env_file:
+      - .env
     volumes:
       - .:/app
     depends_on:
       - db
+    command: fastapi run
 
   db:
     image: postgres:latest
