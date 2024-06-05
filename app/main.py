@@ -10,6 +10,7 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from uuid import UUID
 
@@ -21,6 +22,14 @@ from .websocket.connection_manager import ConnectionManager
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 
 # Dependency
@@ -39,7 +48,7 @@ async def read_root():
 
 @app.post("/users/", response_model=schemas.User, tags=["users"], status_code=201)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_username(db, username=user.username)
+    db_user = crud.user.get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     return crud.user.create_user(db=db, user=user)
