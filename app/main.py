@@ -1,9 +1,22 @@
-from fastapi import Depends, FastAPI, HTTPException, status, File, UploadFile, Response
+from fastapi import (
+    Depends,
+    FastAPI,
+    HTTPException,
+    status,
+    File,
+    UploadFile,
+    Response,
+    WebSocket,
+    WebSocketDisconnect,
+)
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from uuid import UUID
 
+
 from . import crud, schemas, models
 from .database import SessionLocal, engine
+from .websocket.connection_manager import ConnectionManager
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -255,3 +268,28 @@ def delete_indicator(indicator_id: UUID, db: Session = Depends(get_db)):
     if db_indicator is None:
         raise HTTPException(status_code=404, detail="Indicator not found")
     return {"message": "Indicator deleted"}
+
+
+html = open("app/websocket/chatHtml.html").read()
+
+
+@app.get("/chatroom/", response_class=HTMLResponse, tags=["chatroom"])
+async def get():
+    return HTMLResponse(html)
+
+
+manager = ConnectionManager()
+
+
+@app.websocket("/chatroom/{user_id}/")
+async def websocket_endpoint(websocket: WebSocket, user_id: int):
+    await manager.connect(websocket)
+    try:
+        while True:
+            print(f"Client #{user_id} is connected")
+            data = await websocket.receive_text()
+            await manager.send_personal_message(f"You wrote: {data}", websocket)
+            await manager.broadcast(f"Client #{user_id} say: {data}", websocket)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        await manager.broadcast(f"Client #{user_id} left the chat")
