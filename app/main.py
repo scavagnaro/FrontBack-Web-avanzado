@@ -124,6 +124,18 @@ def read_event(event_id: UUID, db: Session = Depends(get_db)):
     return db_event
 
 
+@app.get(
+    "/events/{event_id}/comments/",
+    response_model=list[schemas.Comment],
+    tags=["events"],
+)
+def read_event_comments(event_id: UUID, db: Session = Depends(get_db)):
+    db_comments = crud.event.get_event_comments(db, event_id=event_id)
+    if db_comments is None:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return db_comments
+
+
 @app.patch("/events/{event_id}", response_model=schemas.Event, tags=["events"])
 def update_event(
     event_id: UUID, event: schemas.EventUpdate, db: Session = Depends(get_db)
@@ -211,6 +223,16 @@ def read_city(city_id: UUID, db: Session = Depends(get_db)):
     if db_city is None:
         raise HTTPException(status_code=404, detail="City not found")
     return db_city
+
+
+@app.get(
+    "/cities/{city_id}/events/", response_model=list[schemas.Event], tags=["cities"]
+)
+def read_city_events(city_id: UUID, db: Session = Depends(get_db)):
+    db_events = crud.city.get_city_events(db, city_id=city_id)
+    if db_events is None:
+        raise HTTPException(status_code=404, detail="City not found")
+    return db_events
 
 
 @app.patch("/cities/{city_id}", response_model=schemas.City, tags=["cities"])

@@ -5,7 +5,9 @@ from app import models, schemas
 
 
 def create_comment(db: Session, comment: schemas.CommentCreate):
-    db_comment = models.Comment(message=comment.message, rating=comment.rating)
+    db_comment = models.Comment(
+        message=comment.message, rating=comment.rating, event_id=comment.event_id
+    )
     db.add(db_comment)
     db.commit()
     db.refresh(db_comment)

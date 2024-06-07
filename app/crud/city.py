@@ -20,6 +20,10 @@ def get_city(db: Session, city_id: UUID):
     return db.query(models.City).filter(models.City.id == city_id).first()
 
 
+def get_city_events(db: Session, city_id: UUID):
+    return db.query(models.Event).filter(models.Event.city_id == city_id).all()
+
+
 def update_city(db: Session, city_id: UUID, city: schemas.City):
     db_city = db.query(models.City).filter(models.City.id == city_id).first()
     db_city.name = city.name

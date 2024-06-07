@@ -67,13 +67,16 @@ class CommentBase(BaseModel):
     message: str
     rating: float
 
+    event_id: UUID
+
 
 class CommentCreate(CommentBase):
-    event_id: UUID
+    pass
 
 
 class Comment(CommentBase):
     id: UUID
+    event_id: UUID
 
     class Config:
         orm_mode = True

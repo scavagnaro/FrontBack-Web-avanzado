@@ -29,6 +29,10 @@ def get_event(db: Session, event_id: UUID):
     return db.query(models.Event).filter(models.Event.id == event_id).first()
 
 
+def get_event_comments(db: Session, event_id: UUID):
+    return db.query(models.Comment).filter(models.Comment.event_id == event_id).all()
+
+
 def update_event(db: Session, event_id: UUID, event: schemas.Event):
     db_event = db.query(models.Event).filter(models.Event.id == event_id).first()
     db_event.name = event.name
