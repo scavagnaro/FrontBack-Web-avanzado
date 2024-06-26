@@ -301,6 +301,17 @@ def delete_indicator(indicator_id: UUID, db: Session = Depends(get_db)):
     return {"message": "Indicator deleted"}
 
 
+@app.post("/save_image", tags=["image"])
+async def upload_image(file: UploadFile = File(...)):
+    upload_image_url: str = await crud.image.upload_image(file=file)
+    if upload_image_url is None or not upload_image_url.startswith("http"):
+        return Response(
+            status_code=400,
+            content={"Message": "Image upload failed", "exception": upload_image_url},
+        )
+    return {"image_url": upload_image_url}
+
+
 html = open("app/websocket/chatHtml.html").read()
 
 
